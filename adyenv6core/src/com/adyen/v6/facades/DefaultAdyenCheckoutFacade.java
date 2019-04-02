@@ -434,6 +434,20 @@ public class DefaultAdyenCheckoutFacade implements AdyenCheckoutFacade {
             }
             lockSessionCart();
         }
+        if ("IdentifyShopper".equals(paymentsResponse.getResultCode())) {
+            if (PAYMENT_METHOD_CC.equals(adyenPaymentMethod) || adyenPaymentMethod.indexOf(PAYMENT_METHOD_ONECLICK) == 0) {
+                getSessionService().setAttribute(SESSION_MD, paymentsResponse.getRedirect().getData().get(MD));
+                getSessionService().setAttribute(SESSION_PAYMENT_DATA, paymentsResponse.getPaymentData());
+            }
+            lockSessionCart();
+        }
+        if ("ChallengeShopper".equals(paymentsResponse.getResultCode())) {
+            if (PAYMENT_METHOD_CC.equals(adyenPaymentMethod) || adyenPaymentMethod.indexOf(PAYMENT_METHOD_ONECLICK) == 0) {
+                getSessionService().setAttribute(SESSION_MD, paymentsResponse.getRedirect().getData().get(MD));
+                getSessionService().setAttribute(SESSION_PAYMENT_DATA, paymentsResponse.getPaymentData());
+            }
+            lockSessionCart();
+        }
         throw new AdyenNonAuthorizedPaymentException(paymentsResponse);
     }
 
@@ -630,7 +644,7 @@ public class DefaultAdyenCheckoutFacade implements AdyenCheckoutFacade {
                                                                          && ! "bcmc".equals(paymentMethod.getType())
                                                                          && ! "bcmc_mobile_QR".equals(paymentMethod.getType())
                                                                          && ! PAYMENT_METHOD_IDEAL.equals(paymentMethod.getType())
-                                                                         && paymentMethod.getType().indexOf(PAYMENT_METHOD_BOLETO) != 0)
+                                                                         && paymentMethod.getType().indexOf(PAYMENT_METHOD_BOLETO) != 0411)
                                                                  .collect(Collectors.toList());
         } catch (ApiException | IOException e) {
             LOGGER.error(ExceptionUtils.getStackTrace(e));
@@ -767,6 +781,8 @@ public class DefaultAdyenCheckoutFacade implements AdyenCheckoutFacade {
         paymentInfo.setAdyenLastName(adyenPaymentForm.getLastName());
 
         paymentInfo.setAdyenCardHolder(adyenPaymentForm.getCardHolder());
+
+        paymentInfo.setAdyenBrowserInfo(adyenPaymentForm.getBrowserInfo());
 
         modelService.save(paymentInfo);
 
